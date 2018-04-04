@@ -29,22 +29,14 @@ def main():
     elif '.html'in sys.argv[1] and '.html' in sys.argv[2]:
 	print 'Comparing two html files...'
 	_diff(os.getcwd()+'/'+str(folder1),os.getcwd()+'/'+str(folder2))
-    elif sys.argv[3] == '-c':
+    elif len(sys.argv) >=4 and sys.argv[3] == '-c':
 	concat_sources(folder1)
     	concat_sources(folder2)
     	_diff(os.getcwd()+'/'+str(folder1)+'/'+str(folder1)+'.html',os.getcwd()+'/'+str(folder2)+'/'+str(folder2)+'.html')
     else:
     	_recursive_diff(folder1,folder2)
 
-
-
-def concat_sources(folder):
-
-	try:
-		os.remove(os.getcwd()+'/'+str(folder)+'/'+str(folder)+'.html')
-	except OSError:
-		pass
-	
+def get_html_files(folder):
 	path = os.path.join(os.getcwd(),folder)
 	html_files= []
 	for root,dirs,files in os.walk(path):
@@ -53,6 +45,17 @@ def concat_sources(folder):
 				html_files.append(os.path.join(root,file))
 		break
 	#print (html_files)
+	return html_files
+	
+
+def concat_sources(folder):
+
+	try:
+		os.remove(os.getcwd()+'/'+str(folder)+'/'+str(folder)+'.html')
+	except OSError:
+		pass
+	html_files = get_html_files(folder)
+	
 
 	
 
@@ -79,34 +82,23 @@ def _diff(file1 , file2):
 
 
 def _recursive_diff(folder1, folder2):
-	#folder1
-	path_folder1 = os.path.join(os.getcwd(),folder1)
-	html_files_folder1= []
-	for root,dirs,files in os.walk(path_folder1):
-		for file in files:
-			if file.endswith(".html"):
-				html_files_folder1.append(os.path.join(root,file))
-		break
-	#print (html_files)
-	#folder2
-	path_folder2 = os.path.join(os.getcwd(),folder2)
-	html_files_folder2= []
-	for root,dirs,files in os.walk(path_folder2):
-		for file in files:
-			if file.endswith(".html"):
-				html_files_folder2.append(os.path.join(root,file))
-		break
-	#print (html_files)
-	f = open('result.txt','w')
 
-	for x in range(0,len(html_files_folder1)-1):
-		f.write("\r\r\r\r")
-		f.write("------------------------------"+str(x)+"th .html files compared--------------------------------------")
-		f.write("\r\r")
-		diff = difflib.ndiff(open(html_files_folder1[x]).readlines(),open(html_files_folder2[x]).readlines())
-		f.write(''.join(x[0:] for x in diff if re.match(r"[+]\s*<script",x)),)
-		f.write("------------------------------------------------------------------------------")
-		
+	html_files_folder1= get_html_files(folder1)
+	html_files_folder2= get_html_files(folder2)
+
+	f = open('result.txt','w')
+	if len(html_files_folder1) == len(html_files_folder2):
+		for x in range(0,len(html_files_folder1)-1):
+			f.write("\r\r\r\r")
+			f.write("------------------Analyzing------------"+str(x)+"th .html file to see if any injected scripts exist--------------------------------------")
+			f.write("\r\r")
+			diff = difflib.ndiff(open(html_files_folder1[x]).readlines(),open(html_files_folder2[x]).readlines())
+			f.write(''.join(x[0:] for x in diff if re.match(r"[+]\s*<script",x)),)
+			f.write("------------------------------------------------------------------------------")
+	else:
+		print('# of files in folder1 and # of files in folder 2 do not match')	
+
+	print('Job Completed, result.txt has been created')
 	return
 
 
