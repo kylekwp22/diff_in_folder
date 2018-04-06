@@ -123,7 +123,7 @@ def _make_js_list():
 	
 
 
-	js_txt.write('\r\r'.join(js_list))
+	js_txt.write('\n\n'.join(js_list))
 	print('Job Completed, js_result.txt has been created')
 
 	
@@ -161,9 +161,9 @@ def _recursive_diff(folder1, folder2):
 	if len(html_files_folder1) == len(html_files_folder2):
 		for x in range(0,len(html_files_folder1)-1):
 			print("Comparing "+ str(os.path.basename(html_files_folder1[x])) +"(file #1) and "+ str(os.path.basename(html_files_folder2[x]))+"(file #2) to see if any injected things inside the file #2.")
-			f.write("\r\r\r\r")
+			f.write("\n\n\n\n")
 			f.write("---[+][+][+]----Injected scripts into the-------"+str(os.path.basename(html_files_folder2[x]))+" from the public wifi --------------------------------------")
-			f.write("\r\r")
+			f.write("\n\n")
 			diff = difflib.ndiff(open(html_files_folder1[x]).readlines(),open(html_files_folder2[x]).readlines())
 			f.write(''.join(x[0:] for x in diff if re.match(r"[+]\s*<script",x)),)
 			
@@ -191,9 +191,9 @@ def _recursive_diff_detail(folder1, folder2):
 	if len(html_files_folder1) == len(html_files_folder2):
 		for x in range(0,len(html_files_folder1)-1):
 			print("Comparing "+ str(os.path.basename(html_files_folder1[x])) +"(file #1) and "+ str(os.path.basename(html_files_folder2[x]))+"(file #2) to see if any injected things inside the file #2.")
-			f.write("\r\r\r\r")
+			f.write("\n\n\n\n")
 			f.write("---[+][+][+]----Injected sources into-------"+str(os.path.basename(html_files_folder2[x]))+" from the public wifi --------------------------------------")
-			f.write("\r\r")
+			f.write("\n\n")
 			diff = difflib.ndiff(open(html_files_folder1[x]).readlines(),open(html_files_folder2[x]).readlines())
 			f.write(''.join(diff),)
 			
