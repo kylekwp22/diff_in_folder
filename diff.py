@@ -126,15 +126,13 @@ def _make_js_list():
 	js_txt.write('\r\r'.join(js_list))
 	print('Job Completed, js_result.txt has been created')
 
-	print('Cleaning up previous js_files')
+	
 
-	if os.path.exists(os.path.dirname('./js_files')):
+	if os.path.isdir('./js_files'):
+	    print('Cleaning up previous js_files')
 	    shutil.rmtree('./js_files')
-	    try:
-		os.makedirs(os.path.dirname('./js_files'))
-	    except OSError as exc: # Guard against race condition
-		if exc.errno != errno.EEXIST:
-		    raise
+	    #os.makedirs('./js_files')
+	    
 	
 	for index, jscript in enumerate(js_list):
 		try:
@@ -179,7 +177,7 @@ def _recursive_diff(folder1, folder2):
 	
 
 	
-	print('Job Completed, result.txt, js_result.txt has been created')
+	print('Job Completed, result.txt has been created')
 	return
 
 
@@ -209,7 +207,7 @@ def _recursive_diff_detail(folder1, folder2):
 	
 
 	
-	print('Job Completed, detailed_result.txt,js_result.txt has been created')
+	print('Job Completed, detailed_result.txt has been created')
 	return
 
 
