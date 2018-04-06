@@ -7,6 +7,7 @@ import re
 import os
 import errno
 import requests
+import shutil
 
 
 
@@ -38,11 +39,15 @@ def main():
 	concat_sources(folder1)
     	concat_sources(folder2)
     	_diff(os.getcwd()+'/'+str(folder1)+'/'+str(folder1)+'.html',os.getcwd()+'/'+str(folder2)+'/'+str(folder2)+'.html')
+    elif len(sys.argv) >=4 and sys.argv[3] == '-detail':
+	_recursive_diff_detail(folder1,folder2)
     else:
     	_recursive_diff(folder1,folder2)
 
 def generate_js(index,js_contents):
 	filename = "./js_files/"+index+".js"
+	
+
 	if not os.path.exists(os.path.dirname(filename)):
 	    try:
 		os.makedirs(os.path.dirname(filename))
@@ -108,14 +113,26 @@ def _make_js_list():
 
 	js_list=re.findall(r'=\"([^\"]*\.js[^\"]*)\"',content)
 
+	for index,entry in enumerate(js_list) :
+		#print("adding http to " +entry)
+		if (not entry.startswith('http://') ) and (not entry.startswith('https://')) :
+			if entry.startswith('//'):
+				js_list[index] = 'http:'+js_list[index]
+			else:
+				js_list[index] = 'http://'+js_list[index]
+	
+
+
 	js_txt.write('\r\r'.join(js_list))
 	print('Job Completed, js_result.txt has been created')
 
+	print('Cleaning up previous js_files')
+	shutil.rmtree('./js_files')
 	for index, jscript in enumerate(js_list):
 		try:
 			r = requests.get(jscript)
-			print("making "+jscript+" now")
-			generate_js(str(index),r.text)
+			print("Downloading "+jscript+" now")
+			generate_js(str(index)+'__'+os.path.basename(jscript),r.text)
 		except requests.exceptions.RequestException as err:
 			print("warning:", err)
 			continue
@@ -138,12 +155,12 @@ def _recursive_diff(folder1, folder2):
 	if len(html_files_folder1) == len(html_files_folder2):
 		for x in range(0,len(html_files_folder1)-1):
 			f.write("\r\r\r\r")
-			f.write("---------------"+str(html_files_folder1[x])+" files in home vs public --------------------------------------")
+			f.write("---[+][+][+]----Injected scripts into the-------"+str(os.path.basename(html_files_folder2[x]))+" from the public wifi --------------------------------------")
 			f.write("\r\r")
 			diff = difflib.ndiff(open(html_files_folder1[x]).readlines(),open(html_files_folder2[x]).readlines())
 			f.write(''.join(x[0:] for x in diff if re.match(r"[+]\s*<script",x)),)
 			
-			f.write("------------------------------------------------------------------------------")
+			f.write("-------------------------------------------------------------------------------------------------------------------------------------------------")
 	else:
 		print('# of files in folder1 and # of files in folder 2 do not match')
 	f.close()
@@ -155,6 +172,36 @@ def _recursive_diff(folder1, folder2):
 	
 	print('Job Completed, result.txt has been created')
 	return
+
+
+def _recursive_diff_detail(folder1, folder2):
+
+	html_files_folder1= get_html_files(folder1)
+	html_files_folder2= get_html_files(folder2)
+
+
+	f = open('result.txt','w')
+	if len(html_files_folder1) == len(html_files_folder2):
+		for x in range(0,len(html_files_folder1)-1):
+			f.write("\r\r\r\r")
+			f.write("---[+][+][+]----Injected sources into-------"+str(os.path.basename(html_files_folder2[x]))+" from the public wifi --------------------------------------")
+			f.write("\r\r")
+			diff = difflib.ndiff(open(html_files_folder1[x]).readlines(),open(html_files_folder2[x]).readlines())
+			f.write(''.join(diff),)
+			
+			f.write("-------------------------------------------------------------------------------------------------------------------------------------------------")
+	else:
+		print('# of files in folder1 and # of files in folder 2 do not match')
+	f.close()
+
+
+	_make_js_list()
+	
+
+	
+	print('Job Completed, result.txt has been created')
+	return
+
 
 
 if __name__ == '__main__':
